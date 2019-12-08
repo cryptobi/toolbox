@@ -1,0 +1,17 @@
+config_options.map has been refactored out of the source because is shared by the C++ code and other scripts in the system.
+
+I know it's bad C++ style to use the preprocessor like this, but the intention was to have all the command line options
+for the entire Toolbox in a single place.
+
+For this reason, it's important to preserve its syntax and to nor refactor its contents back into the C++ source.
+
+PYTHON
+------
+
+The accompanying Python tools read config_options.map and substitute ", for ": in order to build a dictionary.
+
+If you add new config variables, make sure to use the same syntax as the pre-existing lines.
+
+E.g. {"key", "description"}
+
+If this syntax is changed, it may break the Python and other scripts who include this file.

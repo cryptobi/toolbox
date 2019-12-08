@@ -1,0 +1,12 @@
+Preparing for Multiple Cryptocurrencies
+---------------------------------------
+
+In the future there'll be one model implementation for each supported cryptocurrency.
+
+The classes under model/ will become interfaces and each implementation refactored into
+their own cryptocurrency/ subfolder.
+
+For now the classes under model/ implement Bitcoin Core directly. This indirection will later
+become useful when supporting multiple cryptos.
+
+Therefore this folder was intentionally left empty - for now.

@@ -28,6 +28,7 @@ ui_*.h
 *.jsc
 Makefile*
 *build-*
+build/
 
 # Qt unit tests
 target_wrapper.*
@@ -35,9 +36,17 @@ target_wrapper.*
 # QtCreator
 *.autosave
 
+# Eclipse et al
+.cproject
+.project
+.settings
+.idea
+
 # QtCreator Qml
 *.qmlproject.user
 *.qmlproject.user.*
 
 # QtCreator CMake
 CMakeLists.txt.user*
+
+PreLoad.cmake
