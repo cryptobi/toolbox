@@ -25,6 +25,6 @@ args = parser.parse_args()
 dao_a = CBDAO()
 dao = dao_a.get_DAO()
 
-tx_hash = args.bitcoin_address
+tx_hash = args.tx_hash
 print(tx_hash)
 

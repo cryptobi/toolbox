@@ -12,23 +12,22 @@
  *
  */
 
+
+ A Satoshi Address: 1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa
+
 """
 
-import cryptobi.toolbox.system.CBConfig
+from cryptobi.toolbox.system.CBConfig import CBConfig
 import cryptobi.model.graph.CBAGNode
 from cryptobi.db.dao.CBDAO import CBDAO
-import argparse
+import sys
 
-
-parser = argparse.ArgumentParser(description = "Query a Bitcoin address from the local databse.")
-parser.add_argument('bitcoin_address', type=str, nargs=1)
-args = parser.parse_args()
+config = CBConfig.get_config()
 
 dao_a = CBDAO()
 dao = dao_a.get_DAO()
 
-addr = args.bitcoin_address
-print(addr)
+addr = config.get_conf("listargs")
 
 # find all infonode texts
 infonodes = dao.list_info_node_by_address(addr)

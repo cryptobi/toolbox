@@ -21,10 +21,15 @@ import sys
 import os
 import configparser
 import argparse
-import argparse
 
 class CBConfig:
 
+    """
+        Crypto.BI Toolbox global configuration object.
+        Use static method CBConfig.get_conf() to obtain a singleton.
+    """
+
+    # static consts
     DEFAULT_BITCOIN_DATADIR = ".bitcoin"
     DEFAULT_USER_DIR = ".Crypto.BI"
     DEFAULT_CONFIG_FILENAME = "crypto.bi.ini"
@@ -32,40 +37,53 @@ class CBConfig:
     DEFAULT_LOG_ERROR_FILE = "crypto.bi.err"
     LOG_FILE_SIZE = 1048576 * 5
     LOG_FILE_DAYS = 3
+    ENVIRONMENT_VAR_HOME = "CRYPTOBI_HOME"
 
-    config_map = {}
+    static_conf = None
+
+    def __init__(self):
+        self.cmd_parser = None
+        self.config_map = {}
+        self.init_config()
+
+    @staticmethod
+    def get_config():
+        if CBConfig.static_conf == None:
+            CBConfig.static_conf = CBConfig()
+        return CBConfig.static_conf
 
     @staticmethod
     def get_user_dir():
         return str(Path.home())
 
-    @staticmethod
-    def read_from_file(config_path):
+    def read_from_file(self, config_path):
         cf = configparser.ConfigParser()
         cf.read(config_path)
-        CBConfig.config_map.update(cf['DEFAULT'])
+        self.config_map.update(cf['DEFAULT'])
 
-    @staticmethod
-    def init_dir(config_dir) :
+    def init_dir(self, config_dir) :
         if not os.path.isdir(config_dir):
             os.mkdir(config_dir)
 
-    @staticmethod
-    def get_conf(key):
-        if key in keys(CBConfig.config_map):
-            return CBConfig.config_map[key]
+    def get_conf(self, key):
+        if key in self.config_map.keys():
+            return self.config_map[key]
         return
 
-    @staticmethod
-    def apply_default_config():
-        CBConfig.config_map["bitcoin_blocks_dir"] = os.path.join(CBConfig.get_user_dir(), CBConfig.DEFAULT_BITCOIN_DATADIR, "blocks")
-        CBConfig.config_map["conf"] = os.path.join(CBConfig.get_user_dir(), CBConfig.DEFAULT_USER_DIR, CBConfig.DEFAULT_CONFIG_FILENAME)
-        CBConfig.config_map["log_dir"] = os.path.join(CBConfig.get_user_dir(), CBConfig.DEFAULT_USER_DIR)
+    def apply_default_config(self):
+        self.config_map["bitcoin_blocks_dir"] = os.path.join(CBConfig.get_user_dir(), CBConfig.DEFAULT_BITCOIN_DATADIR, "blocks")
+        self.config_map["conf"] = os.path.join(CBConfig.get_user_dir(), CBConfig.DEFAULT_USER_DIR, CBConfig.DEFAULT_CONFIG_FILENAME)
+        self.config_map["log_dir"] = os.path.join(CBConfig.get_user_dir(), CBConfig.DEFAULT_USER_DIR)
 
-    @staticmethod
-    def process_command_line(apply=True):
+    def process_command_line(self, apply=True):
         parser = argparse.ArgumentParser()
-        tsp = os.path.join(os.path.dirname(__file__),"..","..","..","toolbox","system","config_options.map")
+        cryptobi_home = os.getenv(CBConfig.ENVIRONMENT_VAR_HOME)
+
+        if cryptobi_home == None:
+            self.log_error("Environment variable {} must be set in order to use Python Crypto.BI Toolbox".format(CBConfig.ENVIRONMENT_VAR_HOME))
+            sys.exit(1)
+
+        tsp = os.path.join(cryptobi_home,"toolbox","system","config_options.map")
 
         with open(tsp, 'r') as f:
             cft = f.read()
@@ -78,30 +96,23 @@ class CBConfig:
                 ak = "--" + k
                 parser.add_argument(ak,help=v,type=str)
 
+        parser.add_argument('listargs', type=str, nargs='?')
         args = vars(parser.parse_args())
 
         if (apply):
             for k in args:
                 v = args[k]
                 if (v is not None):
-                    CBConfig.config_map[k] = v
+                    self.config_map[k] = v
 
-    @staticmethod
-    def log_message(message):
+    def log_message(self, message):
         print("[INFO] {} : {}".format(datetime.now(), message))
 
-    @staticmethod
-    def log_error(error):
+    def log_error(self, error):
         print("[ERROR] {} : {}".format(datetime.now(), message), file=sys.stderr)
 
-
-    @staticmethod
-    def init_config():
-        CBConfig.apply_default_config()
-        CBConfig.process_command_line(True)
-        CBConfig.read_from_file(CBConfig.config_map["conf"])
-        CBConfig.process_command_line(True)
-
-if __name__ == '__main__':
-    CBConfig.init_config()
-    print(CBConfig.config_map)
+    def init_config(self):
+        self.apply_default_config()
+        self.process_command_line(True)
+        self.read_from_file(self.config_map["conf"])
+        self.process_command_line(True)

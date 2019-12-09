@@ -14,11 +14,11 @@
 
 """
 
-class CBInfoNode:
+import unittest
+from cryptobi.db.dao.cbmysql.CBMySQL import CBMySQL
 
-    def __init__(self,cin_id, block_hash, tx_hash, address, content):
-        self.cin_id = cin_id
-        self.block_hash = block_hash
-        self.tx_hash = tx_hash
-        self.address = address
-        self.content = content
+class CBDBConnTests(unittest.TestCase):
+
+    def setUp(self):
+        self.mq = CBMySQL()
+

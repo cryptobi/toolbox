@@ -28,4 +28,4 @@ dao = dao_a.get_DAO()
 nodes = dao.list_info_nodes()
 
 for node in nodes:
-    print(node)
+    print("{}:{}:{}:{}".format(node.block_hash,node.tx_hash,node.address,node.content))

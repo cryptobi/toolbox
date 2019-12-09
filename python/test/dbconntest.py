@@ -14,11 +14,14 @@
 
 """
 
-class CBInfoNode:
+import unittest
+from cryptobi.db.dao.CBDAO import CBDAO
 
-    def __init__(self,cin_id, block_hash, tx_hash, address, content):
-        self.cin_id = cin_id
-        self.block_hash = block_hash
-        self.tx_hash = tx_hash
-        self.address = address
-        self.content = content
+class CBDBConnTests(unittest.TestCase):
+
+    def setUp(self):
+        dao_a = CBDAO()
+        self.dao = dao_a.get_DAO()
+
+    def test_connect(self):
+        return self.dao.test_connection()

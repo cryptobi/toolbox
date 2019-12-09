@@ -37,4 +37,3 @@ content = ""
 with open(filename, "r") as fil:
     content = fil.read()
 
-# TODO process content

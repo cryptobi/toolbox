@@ -45,40 +45,40 @@ class CBDAODriver:
     def insert_tx(self, tx):
         pass
 
-    def get_tx_by_hash(self, hash, ret_tx):
+    def get_tx_by_hash(self, hash):
         pass
 
-    def get_latest_tx(self, ret_tx):
+    def get_latest_tx(self):
         pass
 
     def insert_tx_in(self, tx):
         pass
 
-    def get_tx_in(self, vin, ret_txin):
+    def get_tx_in(self, vin):
         pass
 
-    def get_latest_tx_in(self, ret_txin):
+    def get_latest_tx_in(self):
         pass
 
-    def list_tx_in(self, tx_hash, ret_txin):
+    def list_tx_in(self, tx_hash):
         pass
 
     def insert_tx_out(self, tx):
         pass
 
-    def get_tx_out(self, vout, ret_txout):
+    def get_tx_out(self, vout):
         pass
 
-    def get_latest_tx_out(self, ret_txout):
+    def get_latest_tx_out(self):
         pass
 
-    def list_tx_out(self, tx_hash, ret_txout):
+    def list_tx_out(self, tx_hash):
         pass
 
     def insert_tx_out_address(self, tx_hash, nvout, addr, req_sigs, script_type):
         pass
 
-    def list_tx_out_addresses(self, tx_hash, ret_txout):
+    def list_tx_out_addresses(self, tx_hash):
         pass
 
     def insert_address_graph(self, vin, vout, addr_from, addr_to, satoshis, n_time):
@@ -90,7 +90,7 @@ class CBDAODriver:
     def insert_info_node(self, inode):
         pass
 
-    def get_info_node_by_id(self, id, ret_inode):
+    def get_info_node_by_id(self, id):
         pass
 
     def list_info_node_by_address(self, address):
@@ -105,7 +105,7 @@ class CBDAODriver:
     def list_info_nodes(self):
         pass
 
-    def search_info_node(self, q, ret_vector):
+    def search_info_node(self, q):
         pass
 
     def update_info_node(self, inode):

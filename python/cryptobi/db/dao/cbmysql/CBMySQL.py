@@ -17,15 +17,25 @@
 import sys
 from mysql import connector
 from cryptobi.db.dao.CBDAODriver import CBDAODriver
+from cryptobi.model.graph.CBInfoNode import CBInfoNode
+from cryptobi.toolbox.system.CBConfig import CBConfig
 
 class CBMySQL(CBDAODriver):
+
     """
         Implementation of CBDAODriver for MySQL RDBMS
     """
-    cnx = None
 
-    def connect(self, user, passwd, host, db):
-        cnx = connector.connect(self, user=user, password=passwd, host=host, database=db)
+    def __init__(self):
+        self.config = CBConfig.get_config()
+        self.dbuser = self.config.get_conf("db.user".format(self.config.get_conf("db.db")))
+        self.dbpass = self.config.get_conf("db.pass".format(self.config.get_conf("db.db")))
+        self.dbdb   = self.config.get_conf("db.db".format(self.config.get_conf("db.db")))
+        self.dbhost = self.config.get_conf("db.host".format(self.config.get_conf("db.db")))
+        self.connect(self.dbuser, self.dbpass, self.dbhost, self.dbdb)
+
+    def connect(self, u, passwd, h, db):
+        self.cnx = connector.connect(user=u, password=passwd, host=h, database=db)
 
     def test_connection(self):
         pass
@@ -33,13 +43,13 @@ class CBMySQL(CBDAODriver):
     def insert_block(self, block):
         pass
 
-    def get_block_by_hash(self, hash, ret_block):
+    def get_block_by_hash(self, hash):
         pass
 
-    def get_latest_block(self, ret_block):
+    def get_latest_block(self):
         pass
 
-    def get_latest_block_hash(self, ret_hash):
+    def get_latest_block_hash(self):
         pass
 
     def insert_block_file(self, filename, hash, byte_offset):
@@ -51,73 +61,129 @@ class CBMySQL(CBDAODriver):
     def insert_tx(self, tx):
         pass
 
-    def get_tx_by_hash(self, hash, ret_tx):
+    def get_tx_by_hash(self, hash):
         pass
 
-    def get_latest_tx(self, ret_tx):
+    def get_latest_tx(self):
         pass
 
     def insert_tx_in(self, tx):
         pass
 
-    def get_tx_in(self, vin, ret_txin):
+    def get_tx_in(self, vin):
         pass
 
-    def get_latest_tx_in(self, ret_txin):
+    def get_latest_tx_in(self):
         pass
 
-    def list_tx_in(self, tx_hash, ret_txin):
+    def list_tx_in(self, tx_hash):
         ret = []
         return ret
 
     def insert_tx_out(self, tx):
         pass
 
-    def get_tx_out(self, vout, ret_txout):
+    def get_tx_out(self, vout):
         pass
 
-    def get_latest_tx_out(self, ret_txout):
+    def get_latest_tx_out(self):
         pass
 
-    def list_tx_out(self, tx_hash, ret_txout):
+    def list_tx_out(self, tx_hash):
         ret = []
         return ret
 
     def insert_tx_out_address(self, tx_hash, nvout, addr, req_sigs, script_type):
         pass
 
-    def list_tx_out_addresses(self, tx_hash, ret_txout):
+    def list_tx_out_addresses(self, tx_hash):
         pass
 
     def insert_address_graph(self, vin, vout, addr_from, addr_to, satoshis, n_time):
         pass
 
     def list_address_graph(self, addr):
-        pass
+        ret = []
+        cursor = self.cnx.cursor()
+
+        sql = ("SELECT cag_id, n_vout, tx_from, n_vin, tx_to, address_from, address_to, satoshis, n_time FROM {}.cb_address_graph WHERE address_from = %s OR address_to = %s".format(self.config.get_conf("db.db")))
+        cursor.execute(sql, (addr, addr, ) )
+
+        for cin_id, block_hash, tx_hash, address, content in cursor:
+            ret.append(CBInfoNode(cin_id, block_hash, tx_hash, address, content))
+
+        cursor.close()
+        return ret
 
     def insert_info_node(self, inode):
         pass
 
-    def get_info_node_by_id(self, id, ret_inode):
-        pass
+    def get_info_node_by_id(self, id):
+        ret = None
+        cursor = self.cnx.cursor()
+
+        sql = ("SELECT cin_id, HEX(block_hash), HEX(tx_hash), address, content FROM {}.cb_info_nodes WHERE block_hash = %s".format(self.config.get_conf("db.db")))
+        cursor.execute(sql, (hash, ) )
+
+        for cin_id, block_hash, tx_hash, address, content in cursor:
+            ret = CBInfoNode(cin_id, block_hash, tx_hash, address, content)
+
+        cursor.close()
+        return ret
 
     def list_info_node_by_address(self, address):
         ret = []
+        cursor = self.cnx.cursor()
+
+        sql = ("SELECT cin_id, HEX(block_hash), HEX(tx_hash), address, content FROM {}.cb_info_nodes WHERE address = %s".format(self.config.get_conf("db.db")))
+        cursor.execute(sql, (address, ))
+
+        for cin_id, block_hash, tx_hash, address, content in cursor:
+            ret.append(CBInfoNode(cin_id, block_hash, tx_hash, address, content))
+
+        cursor.close()
         return ret
 
-    def list_info_node_by_block_hash(self, hash):
+    def list_info_node_by_block_hash(self,  hash):
         ret = []
+        cursor = self.cnx.cursor()
+
+        sql = ("SELECT cin_id, HEX(block_hash), HEX(tx_hash), address, content FROM {}.cb_info_nodes WHERE block_hash = %s".format(self.config.get_conf("db.db")))
+        cursor.execute(sql, (hash, ) )
+
+        for cin_id, block_hash, tx_hash, address, content in cursor:
+            ret.append(CBInfoNode(cin_id, block_hash, tx_hash, address, content))
+
+        cursor.close()
         return ret
 
-    def list_info_node_by_tx_hash(self, hash):
+    def list_info_node_by_tx_hash(self,  hash):
         ret = []
+        cursor = self.cnx.cursor()
+
+        sql = ("SELECT cin_id, HEX(block_hash), HEX(tx_hash), address, content FROM {}.cb_info_nodes WHERE tx_hash = %s".format(self.config.get_conf("db.db")))
+        cursor.execute(sql, (hash, ) )
+
+        for cin_id, block_hash, tx_hash, address, content in cursor:
+            ret.append(CBInfoNode(cin_id, block_hash, tx_hash, address, content))
+
+        cursor.close()
         return ret
 
     def list_info_nodes(self):
         ret = []
+        cursor = self.cnx.cursor()
+
+        sql = ("SELECT cin_id, HEX(block_hash), HEX(tx_hash), address, content FROM {}.cb_info_nodes".format(self.config.get_conf("db.db")))
+        cursor.execute(sql)
+
+        for cin_id, block_hash, tx_hash, address, content in cursor:
+            ret.append(CBInfoNode(cin_id, block_hash, tx_hash, address, content))
+
+        cursor.close()
         return ret
 
-    def search_info_node(self, q, ret_vector):
+    def search_info_node(self, q):
         pass
 
     def update_info_node(self, inode):
