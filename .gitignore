@@ -50,3 +50,4 @@ target_wrapper.*
 CMakeLists.txt.user*
 
 PreLoad.cmake
+__pycache__
