@@ -30,6 +30,9 @@ class CBDAODriver:
     def get_block_by_hash(self, hash):
         pass
 
+    def get_next_block(self, prev_block_hash):
+        pass
+
     def get_latest_block(self):
         pass
 

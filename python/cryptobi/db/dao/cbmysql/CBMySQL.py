@@ -18,6 +18,7 @@ import sys
 from mysql import connector
 from cryptobi.db.dao.CBDAODriver import CBDAODriver
 from cryptobi.model.graph.CBInfoNode import CBInfoNode
+from cryptobi.model.blockchains.CBBlock import CBBlock
 from cryptobi.toolbox.system.CBConfig import CBConfig
 
 class CBMySQL(CBDAODriver):
@@ -44,7 +45,43 @@ class CBMySQL(CBDAODriver):
         pass
 
     def get_block_by_hash(self, hash):
-        pass
+        """
+        Parameter hash is a bytes instance.
+        """
+        return self.__get_block_by(hash, "hash_this_block")
+
+    def get_next_block(self, prev_block_hash):
+        """
+        Parameter hash is a bytes instance.
+        """
+        return self.__get_block_by(prev_block_hash, "hash_prev_block")
+
+    def __get_block_by(self, hash, column):
+        """
+        Refactored get block funcs by a certain column.
+        """
+        ret = []
+        cursor = self.cnx.cursor()
+
+        sql = ("SELECT 	table_seq, n_version, hash_this_block, hash_prev_block, hash_merkle_root, hash_next_block, n_time, n_bits, nonce, block_height FROM {}.cb_address_graph WHERE hash_this_block = %s".format(self.config.get_conf("db.db")))
+        cursor.execute(sql, (hash, ))
+
+        for table_seq, n_version, hash_this_block, hash_prev_block, hash_merkle_root, hash_next_block, n_time, n_bits, nonce, block_height in cursor:
+            cbb = CBBlock()
+            cbb.table_seq = table_seq
+            cbb.bits = n_bits
+            cbb.hash = hash_this_block
+            cbb.hash_next_block = hash_next_block
+            cbb.hash_prev_block = hash_prev_block
+            cbb.height = block_height
+            cbb.merkle_root = hash_merkle_root
+            cbb.n_version = n_version
+            cbb.nonce = nonce
+            cbb.ntime = n_time
+            ret.append(cbb)
+
+        cursor.close()
+        return ret
 
     def get_latest_block(self):
         pass
