@@ -51,3 +51,4 @@ CMakeLists.txt.user*
 
 PreLoad.cmake
 __pycache__
+*.pyc

@@ -33,9 +33,13 @@ current_block = CBBlock.genesis()
 height = 0
 
 # walk the blockchain setting the next_hash pointers and block height
-while current_block is not None:
+while current_block:
+
     print("{:10} {}".format(height, current_block.hash.hex()))
     height += 1
     old_block = current_block
+
     current_block = dao.get_next_block(current_block.hash)
-    dao.set_next_block_hash_and_height(old_block.hash, current_block.hash, height)
+
+    if current_block:
+        dao.set_next_block_hash_and_height(old_block.hash, current_block.hash, height)
