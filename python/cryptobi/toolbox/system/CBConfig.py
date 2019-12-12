@@ -15,7 +15,6 @@
 """
 
 from datetime import datetime
-from operator import itemgetter
 from pathlib import Path
 import sys
 import os
@@ -109,7 +108,7 @@ class CBConfig:
         print("[INFO] {} : {}".format(datetime.now(), message))
 
     def log_error(self, error):
-        print("[ERROR] {} : {}".format(datetime.now(), message), file=sys.stderr)
+        print("[ERROR] {} : {}".format(datetime.now(), error), file=sys.stderr)
 
     def init_config(self):
         self.apply_default_config()

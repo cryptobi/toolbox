@@ -14,13 +14,28 @@
 
 """
 
+# KNOWN BUG: must load the mysql module before all other libraries
+# so they don't load an incompatible version of openssl which causes
+# random segfaults with mysql procedures
+# mysql module is not used here but must be loaded first on some systems
+from mysql import connector
+
 from cryptobi.toolbox.system.CBConfig import CBConfig
-from cryptobi.model.graph.CBAGNode import CBAGNode
 from cryptobi.model.blockchains.CBBlock import CBBlock
 from cryptobi.db.dao.CBDAO import CBDAO
 import sys
 
 config = CBConfig.get_config()
-dao = CBDAO().get_DAO()
-genesis = CBBlock.genesis()
+dao = CBDAO.get_DAO()
 
+# bootstrap the blockchain
+current_block = CBBlock.genesis()
+height = 0
+
+# walk the blockchain setting the next_hash pointers and block height
+while current_block is not None:
+    print("{:10} {}".format(height, current_block.hash.hex()))
+    height += 1
+    old_block = current_block
+    current_block = dao.get_next_block(current_block.hash)
+    dao.set_next_block_hash_and_height(old_block.hash, current_block.hash, height)

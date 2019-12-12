@@ -53,7 +53,7 @@ class BlockInserterCallback : public db::fs::CBBlockCallback {
 	bool has_last_file;
 	bool last_file_checked;
 	std::shared_ptr<toolbox::system::CBConfig> config;
-	bool threaded; // whether being run in multithreaded mode
+	bool threaded; // being run in multithreaded mode?
 	int pool_size;
 
 

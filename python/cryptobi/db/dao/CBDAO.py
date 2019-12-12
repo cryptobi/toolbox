@@ -20,20 +20,21 @@ from cryptobi.db.dao.cbmysql.CBMySQL import CBMySQL
 
 class CBDAO:
 
-    pool_size = 0
-    _drivers = []
     _dao = None
 
     def __init__(_self):
+        _self._drivers = []
         _self.pool_size = multiprocessing.cpu_count()
         _self.init_dao()
 
     def init_dao(_self):
         for i in range(_self.pool_size):
-            _self._drivers.append(CBMySQL())
+            ix = CBMySQL()
+            _self._drivers.append(ix)
 
     @staticmethod
-    def get_DAO(_self):
+    def get_DAO():
+
         if CBDAO._dao is None:
             CBDAO._dao = CBDAO()
         return random.choice(CBDAO._dao._drivers)

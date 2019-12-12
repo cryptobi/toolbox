@@ -15,11 +15,11 @@
 """
 
 import sys
-from mysql import connector
 from cryptobi.db.dao.CBDAODriver import CBDAODriver
 from cryptobi.model.graph.CBInfoNode import CBInfoNode
 from cryptobi.model.blockchains.CBBlock import CBBlock
 from cryptobi.toolbox.system.CBConfig import CBConfig
+from mysql import connector
 
 class CBMySQL(CBDAODriver):
 
@@ -28,6 +28,7 @@ class CBMySQL(CBDAODriver):
     """
 
     def __init__(self):
+
         self.config = CBConfig.get_config()
         self.dbuser = self.config.get_conf("db.user".format(self.config.get_conf("db.db")))
         self.dbpass = self.config.get_conf("db.pass".format(self.config.get_conf("db.db")))
@@ -36,7 +37,7 @@ class CBMySQL(CBDAODriver):
         self.connect(self.dbuser, self.dbpass, self.dbhost, self.dbdb)
 
     def connect(self, u, passwd, h, db):
-        self.cnx = connector.connect(user=u, password=passwd, host=h, database=db)
+        self.cnx = connector.connect(user=u, password=passwd, host=h, database=db, use_pure=True)
 
     def test_connection(self):
         pass
@@ -56,15 +57,22 @@ class CBMySQL(CBDAODriver):
         """
         return self.__get_block_by(prev_block_hash, "hash_prev_block")
 
-    def __get_block_by(self, hash, column):
+    def __get_block_by(self, hash, column) -> CBBlock:
         """
         Refactored get block funcs by a certain column.
         """
-        ret = []
-        cursor = self.cnx.cursor()
 
-        sql = ("SELECT 	table_seq, n_version, hash_this_block, hash_prev_block, hash_merkle_root, hash_next_block, n_time, n_bits, nonce, block_height FROM {}.cb_address_graph WHERE hash_this_block = %s".format(self.config.get_conf("db.db")))
-        cursor.execute(sql, (hash, ))
+        ret = None
+        cursor = self.cnx.cursor()
+        db = self.config.get_conf("db.db")
+        sql = "SELECT table_seq, n_version, hash_this_block, hash_prev_block, hash_merkle_root, hash_next_block, n_time, n_bits, nonce, block_height FROM {}.cb_blockchain WHERE {} = %s".format(db, column)
+
+        try:
+            cursor.execute(sql, (hash, ))
+        except Exception as e:
+            print(e)
+            cursor.close()
+            return None
 
         for table_seq, n_version, hash_this_block, hash_prev_block, hash_merkle_root, hash_next_block, n_time, n_bits, nonce, block_height in cursor:
             cbb = CBBlock()
@@ -78,10 +86,41 @@ class CBMySQL(CBDAODriver):
             cbb.n_version = n_version
             cbb.nonce = nonce
             cbb.ntime = n_time
-            ret.append(cbb)
+            ret = cbb
 
         cursor.close()
         return ret
+
+    def set_next_block_hash(self, thisblock_hash, nextblock_hash):
+        cursor = self.cnx.cursor()
+        db = self.config.get_conf("db.db")
+        sql = "UPDATE {}.cb_blockchain SET hash_next_block = %s WHERE hash_this_block = %s".format(db)
+
+        try:
+            cursor.execute(sql, (nextblock_hash, thisblock_hash, ))
+            self.cnx.commit()
+        except Exception as e:
+            print(e)
+            cursor.close()
+            return None
+
+        cursor.close()
+
+    def set_next_block_hash_and_height(self, thisblock_hash, nextblock_hash, height):
+        cursor = self.cnx.cursor()
+        db = self.config.get_conf("db.db")
+        sql = "UPDATE {}.cb_blockchain SET hash_next_block = %s, block_height = %s WHERE hash_this_block = %s".format(db)
+
+        try:
+            cursor.execute(sql, (nextblock_hash, height, thisblock_hash, ))
+            self.cnx.commit()
+        except Exception as e:
+            print(e)
+            cursor.close()
+            return None
+
+        cursor.close()
+
 
     def get_latest_block(self):
         pass

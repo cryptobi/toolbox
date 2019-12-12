@@ -55,7 +55,9 @@ namespace toolbox::system {
 		ini.interpolate();
 		auto sym = ini.get_symbols();
 		for (const auto &[name, value] : sym) {
-			config_map[name.substr(3, name.length()-4)] = value;
+			std::size_t beg = name.find_first_of(":");
+			std::size_t bnd = name.find_last_of("}");
+			config_map[name.substr(beg+1, (bnd-beg)-1)] = value;
 		}
 		return true;
 	}
