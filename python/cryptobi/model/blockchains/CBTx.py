@@ -19,9 +19,20 @@ class CBTx:
     """
         General transaction class.
     """
-
     def __init__(self):
-        pass
+        self.table_seq = 0
+        self.hash_this_tx = False
+        self.n_version = 1
+        self.has_witness = False
+        self.in_counter = 0
+        self.lock_time = 0
+        self.block_order = 0
+        self.witness_hash = bytes.fromhex("00")
+        self.hash_block = bytes.fromhex("00")
+
+    def __repr__(self):
+        return self.hash_this_tx.hex()
+
 
 
 class CBTxIn:

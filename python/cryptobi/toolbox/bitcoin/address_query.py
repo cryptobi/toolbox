@@ -17,6 +17,12 @@
 
 """
 
+# KNOWN BUG: must load the mysql module before all other libraries
+# so they don't load an incompatible version of openssl which causes
+# random segfaults with mysql procedures
+# mysql module is not used here but must be loaded first on some systems
+from mysql import connector
+
 from cryptobi.toolbox.system.CBConfig import CBConfig
 import cryptobi.model.graph.CBAGNode
 from cryptobi.db.dao.CBDAO import CBDAO

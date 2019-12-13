@@ -54,6 +54,9 @@ class CBDAODriver:
     def insert_tx(self, tx):
         pass
 
+    def list_tx_by_block(self, block_hash):
+        pass
+
     def get_tx_by_hash(self, hash):
         pass
 

@@ -18,6 +18,8 @@ import sys
 from cryptobi.db.dao.CBDAODriver import CBDAODriver
 from cryptobi.model.graph.CBInfoNode import CBInfoNode
 from cryptobi.model.blockchains.CBBlock import CBBlock
+from cryptobi.model.blockchains.CBTx import CBTx
+
 from cryptobi.toolbox.system.CBConfig import CBConfig
 from mysql import connector
 
@@ -123,10 +125,38 @@ class CBMySQL(CBDAODriver):
 
 
     def get_latest_block(self):
-        pass
+        ret = None
+        cursor = self.cnx.cursor()
+        db = self.config.get_conf("db.db")
+        sql = "SELECT table_seq, n_version, hash_this_block, hash_prev_block, hash_merkle_root, hash_next_block, n_time, n_bits, nonce, block_height FROM {}.cb_blockchain ORDER BY table_seq DESC LIMIT 1".format(db)
+
+        try:
+            cursor.execute(sql, (hash, ))
+        except Exception as e:
+            print(e)
+            cursor.close()
+            return None
+
+        for table_seq, n_version, hash_this_block, hash_prev_block, hash_merkle_root, hash_next_block, n_time, n_bits, nonce, block_height in cursor:
+            cbb = CBBlock()
+            cbb.table_seq = table_seq
+            cbb.bits = n_bits
+            cbb.hash = hash_this_block
+            cbb.hash_next_block = hash_next_block
+            cbb.hash_prev_block = hash_prev_block
+            cbb.height = block_height
+            cbb.merkle_root = hash_merkle_root
+            cbb.n_version = n_version
+            cbb.nonce = nonce
+            cbb.ntime = n_time
+            ret = cbb
+
+        cursor.close()
+        return ret
 
     def get_latest_block_hash(self):
-        pass
+        block = self.get_latest_block()
+        return block.hash
 
     def insert_block_file(self, filename, hash, byte_offset):
         pass
@@ -137,8 +167,51 @@ class CBMySQL(CBDAODriver):
     def insert_tx(self, tx):
         pass
 
-    def get_tx_by_hash(self, hash):
-        pass
+    def list_tx_by_block(self, block_hash):
+        ret = []
+        cursor = self.cnx.cursor()
+
+        sql = ("SELECT table_seq, hash_this_tx, n_version, has_witness, in_counter, lock_time, block_order, witness_hash, hash_block FROM {}.cb_tx WHERE hash_block = %s".format(self.config.get_conf("db.db")))
+        cursor.execute(sql, (block_hash, ) )
+
+        for table_seq, hash_this_tx, n_version, has_witness, in_counter, lock_time, block_order, witness_hash, hash_block in cursor:
+            tx = CBTx()
+            tx.table_seq = table_seq
+            tx.hash_this_tx = hash_this_tx
+            tx.n_version = n_version
+            tx.has_witness = has_witness
+            tx.in_counter = in_counter
+            tx.lock_time = lock_time
+            tx.block_order = block_order
+            tx.witness_hash = witness_hash
+            tx.hash_block = hash_block
+            ret.append(tx)
+
+        cursor.close()
+        return ret
+
+    def get_tx_by_hash(self, hashtx):
+        ret = None
+        cursor = self.cnx.cursor()
+
+        sql = ("SELECT table_seq, hash_this_tx, n_version, has_witness, in_counter, lock_time, block_order, witness_hash, hash_block FROM {}.cb_tx WHERE hash_this_tx = %s".format(self.config.get_conf("db.db")))
+        cursor.execute(sql, (hashtx, ) )
+
+        for table_seq, hash_this_tx, n_version, has_witness, in_counter, lock_time, block_order, witness_hash, hash_block in cursor:
+            tx = CBTx()
+            tx.table_seq = table_seq
+            tx.hash_this_tx = hash_this_tx
+            tx.n_version = n_version
+            tx.has_witness = has_witness
+            tx.in_counter = in_counter
+            tx.lock_time = lock_time
+            tx.block_order = block_order
+            tx.witness_hash = witness_hash
+            tx.hash_block = hash_block
+            ret = tx
+
+        cursor.close()
+        return ret
 
     def get_latest_tx(self):
         pass
