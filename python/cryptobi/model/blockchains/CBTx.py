@@ -41,8 +41,13 @@ class CBTxIn:
         Transaction input class.
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, table_seq, txid, n_vout, hash_this_tx, n_sequence):
+        self.table_seq =table_seq
+        self.txid = txid
+        self.n_vout = n_vout
+        self.hash_this_tx = hash_this_tx
+        self.n_sequence = n_sequence
+
 
 
 class CBTxOut:
@@ -51,8 +56,14 @@ class CBTxOut:
         Transaction output class.
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, table_seq, satoshis, n_vout, hash_this_tx, hash_tx_spent, script_req_sigs, script_type):
+        self.table_seq = table_seq
+        self.satoshis = satoshis
+        self.n_vout = n_vout
+        self.hash_this_tx = hash_this_tx
+        self.hash_tx_spent = hash_tx_spent
+        self.script_req_sigs = script_req_sigs
+        self.script_type = script_type
 
 
 class CBTxOutAddress:
@@ -61,12 +72,10 @@ class CBTxOutAddress:
         Utility class for database table cb_tx_out_addresses
     """
 
-    table_seq = 0
-    n_vout = 0
-    hash_tx = 0
-    address = ""
-    script_req_sigs = 0
-    script_type = 0
-
-    def __init__(self):
-        pass
+    def __init__(self, table_seq, n_vout, hash_tx, address, script_req_sigs, script_type):
+        self.table_seq = table_seq
+        self.n_vout = n_vout
+        self.hash_tx = hash_tx
+        self.address = address
+        self.script_req_sigs = script_req_sigs
+        self.script_type = script_type

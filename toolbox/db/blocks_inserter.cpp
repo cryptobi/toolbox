@@ -59,12 +59,9 @@ class BlockInserterCallback : public db::fs::CBBlockCallback {
 
 public:
 
-	uint256 genhash;
-
 	// Genesis block hash is hardcoded
 	BlockInserterCallback() : last_file_time(std::chrono::system_clock::now()),
 			files_done(0), last_byte_offset(0), has_last_file(false), last_file_checked(false), config(nullptr), threaded(false), pool_size(0) {
-		genhash.SetHex("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
 		has_last_file = dao->get_latest_block_file(last_file, last_hash, last_byte_offset);
 		pool_size = std::thread::hardware_concurrency();
 	}
@@ -74,10 +71,9 @@ public:
 		auto block = cbe.getBlock();
 		db::fs::bitcoin::CBEncoder encoder;
 
-		// skip genesis block
 		auto b2 = block.getBlock();
 
-		if ((b2 != nullptr) && (genhash != b2->GetHash()) ) {
+		if (b2 != nullptr) {
 
 			// skip done files
 			if (has_last_file && !last_file_checked) {

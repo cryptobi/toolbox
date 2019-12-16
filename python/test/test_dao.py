@@ -15,13 +15,17 @@
 """
 
 import unittest
+import multiprocessing
 from cryptobi.db.dao.CBDAO import CBDAO
 
-class CBDBConnTests(unittest.TestCase):
+class CBDAOTest(unittest.TestCase):
 
     def setUp(self):
-        dao_a = CBDAO()
-        self.dao = dao_a.get_DAO()
+        self.dao = CBDAO.get_DAO()
 
-    def test_connect(self):
-        return self.dao.test_connection()
+    def test_getdao(self):
+        self.assertIsNot(self.dao, None)
+
+    def test_poolsize(self):
+        c = CBDAO()
+        self.assertEquals(c.pool_size, multiprocessing.cpu_count())

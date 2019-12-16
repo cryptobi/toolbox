@@ -15,9 +15,13 @@
 """
 
 import unittest
-from cryptobi.toolbox.system.CBConfig import CBConfig
+from cryptobi.db.dao.CBDAO import CBDAO
 
-class CBConfigTests(unittest.TestCase):
+class CBDBConnTests(unittest.TestCase):
 
     def setUp(self):
-        pass
+        dao_a = CBDAO()
+        self.dao = dao_a.get_DAO()
+
+    def test_connect(self):
+        self.assertTrue(self.dao.test_connection())

@@ -22,15 +22,15 @@ class CBDAO:
 
     _dao = None
 
-    def __init__(_self):
-        _self._drivers = []
-        _self.pool_size = multiprocessing.cpu_count()
-        _self.init_dao()
+    def __init__(self):
+        self._drivers = []
+        self.pool_size = multiprocessing.cpu_count()
+        self.init_dao()
 
-    def init_dao(_self):
-        for i in range(_self.pool_size):
+    def init_dao(self):
+        for i in range(self.pool_size):
             ix = CBMySQL()
-            _self._drivers.append(ix)
+            self._drivers.append(ix)
 
     @staticmethod
     def get_DAO():

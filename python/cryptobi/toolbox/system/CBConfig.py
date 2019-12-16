@@ -75,6 +75,8 @@ class CBConfig:
         self.config_map["log_dir"] = os.path.join(CBConfig.get_user_dir(), CBConfig.DEFAULT_USER_DIR)
 
     def process_command_line(self, apply=True):
+
+        args = []
         parser = argparse.ArgumentParser()
         cryptobi_home = os.getenv(CBConfig.ENVIRONMENT_VAR_HOME)
 
@@ -95,13 +97,15 @@ class CBConfig:
                 ak = "--" + k
                 parser.add_argument(ak,help=v,type=str)
 
-        parser.add_argument('listargs', type=str, nargs='?')
-        args = vars(parser.parse_args())
+        if len(sys.argv) > 1:
+            parser.add_argument('listargs', type=str, nargs='?')
+            known, unknown = parser.parse_known_args()
+            args = vars(known)
 
-        if (apply):
+        if apply:
             for k in args:
                 v = args[k]
-                if (v is not None):
+                if v is not None:
                     self.config_map[k] = v
 
     def log_message(self, message):

@@ -129,13 +129,22 @@ create table cb_address_graph(
     KEY by_n_vin USING BTREE (n_vin)
 ) CHARACTER SET binary ENGINE=MyISAM;
 
+create table cb_address_balance(
+     cab_id bigint NOT NULL AUTO_INCREMENT,
+     address varchar(90) NOT NULL, -- 90 char max bech32 address len
+     satoshis bigint not null,
+     PRIMARY KEY by_cag_id USING BTREE (cab_id),
+     KEY by_satoshis USING BTREE (satoshis),
+     KEY by_adress USING HASH (address)
+) CHARACTER SET binary ENGINE=MyISAM;
+
 -- this is where we save the information we have
 -- about certain nodes (tx, blocks, etc)
 create table cb_info_nodes(
     cin_id bigint NOT NULL AUTO_INCREMENT,
-    block_hash char(32) BINARY,
-    tx_hash char(32) BINARY,
-    address varchar(90),
+    block_hash char(32) BINARY CHARACTER SET BINARY,
+    tx_hash char(32) BINARY CHARACTER SET BINARY,
+    address varchar(90) CHARACTER SET BINARY,
     content text,
     PRIMARY KEY by_cin_id USING BTREE (cin_id),
     KEY by_block_hash USING HASH (block_hash),
@@ -144,9 +153,15 @@ create table cb_info_nodes(
     KEY by_content USING BTREE (content(1024))
 )  CHARACTER SET utf8 ENGINE=InnoDB;
 
--- INSERT GENESIS BLOCK
-INSERT INTO cb_blockchain(n_version, hash_this_block, hash_prev_block,hash_merkle_root,hash_next_block, n_time, n_bits, nonce, block_height)
-VALUES(1, X'000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f', X'0000000000000000000000000000000000000000000000000000000000000000',
-       X'4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b', X'00000000839a8e6886ab5951d76f411475428afc90947ee320161bbf18eb6048',
-       1231006505, 486604799, 2083236893, 0 );
-
+--
+--
+-- MANUALLY INSERT GENESIS BLOCK
+-- (GENESIS WAS PREVIOUSLY INSERTED BY HAND.)
+-- LEFT HERE FOR REFERENCE.
+--
+-- INSERT INTO cb_blockchain(n_version, hash_this_block, hash_prev_block,hash_merkle_root,hash_next_block, n_time, n_bits, nonce, block_height)
+-- VALUES(1, X'000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f', X'0000000000000000000000000000000000000000000000000000000000000000',
+--       X'4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b', X'00000000839a8e6886ab5951d76f411475428afc90947ee320161bbf18eb6048',
+--       1231006505, 486604799, 2083236893, 0);
+--
+--

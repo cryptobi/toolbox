@@ -14,11 +14,12 @@
 
 """
 
-class CBInfoNode:
-
-    def __init__(self, cin_id, block_hash, tx_hash, address, content):
-        self.cin_id = cin_id
-        self.block_hash = block_hash
-        self.tx_hash = tx_hash
+class CBBalance:
+    """
+    Simple struct for DB table cb_address_balance or equivalent
+    """
+    def __init__(self, cab_id, address, satoshis):
+        self.cab_id = cab_id
         self.address = address
-        self.content = content
+        self.satoshis = satoshis
+

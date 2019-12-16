@@ -17,6 +17,8 @@
 class CBDAODriver:
     """
         Abstract class / interface for database access layer.
+        Override all methods to create DB interface for other DBMS.
+        All hash parameters are bytes instances.
     """
     def connect(self, user, password, host, db):
         pass
@@ -93,10 +95,16 @@ class CBDAODriver:
     def list_tx_out_addresses(self, tx_hash):
         pass
 
-    def insert_address_graph(self, vin, vout, addr_from, addr_to, satoshis, n_time):
+    def insert_address_graph(self, ag):
         pass
 
     def list_address_graph(self, addr):
+        pass
+
+    def set_address_balance(self, address, satoshis):
+        pass
+
+    def get_address_balance(self, address):
         pass
 
     def insert_info_node(self, inode):
@@ -132,3 +140,5 @@ class CBDAODriver:
     def enable_keys(self):
         pass
 
+    def list_tables(self):
+        pass

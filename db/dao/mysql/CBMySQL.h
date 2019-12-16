@@ -60,7 +60,7 @@ class CBMySQL: public db::dao::CBDAODriver {
 		"cb_tx_out",
 		"cb_tx_out_addresses",
 		"cb_address_graph",
-		"cb_info_nodes",
+		"cb_address_balance",
 		"cb_info_nodes",
 	};
 
