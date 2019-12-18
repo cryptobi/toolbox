@@ -14,6 +14,8 @@
 
 """
 
+from cryptobi.crypto.CBUtil import CBUtil
+
 class CBTx:
 
     """
@@ -34,9 +36,9 @@ class CBTx:
         rd = self.__dict__
         ret = ""
         try:
-            rd["hash_this_tx"] = rd["hash_this_tx"].hex()
-            rd["hash_block"] = rd["hash_block"].hex()
-            rd["witness_hash"] = rd["witness_hash"].hex()
+            rd["hash_this_tx"] = CBUtil.safe_hash(rd["hash_this_tx"]).hex()
+            rd["hash_block"] = CBUtil.safe_hash(rd["hash_block"]).hex()
+            rd["witness_hash"] = CBUtil.safe_hash(rd["witness_hash"]).hex()
             ret = str(self.__dict__)
         except:
             pass
@@ -62,9 +64,12 @@ class CBTxIn:
         rd = self.__dict__
         ret = ""
         try:
-            rd["hash_this_tx"] = rd["hash_this_tx"].hex()
+            rd["hash_this_tx"] = CBUtil.safe_hash(rd["hash_this_tx"]).hex()
+            rd["txid"] = CBUtil.safe_hash(rd["txid"]).hex()
             ret = str(self.__dict__)
-        except:
+        except Exception as e:
+            print("Error in TxIn")
+            print(e)
             pass
 
         return ret
@@ -88,11 +93,12 @@ class CBTxOut:
         rd = self.__dict__
         ret = ""
         try:
-            rd["hash_this_tx"] = rd["hash_this_tx"].hex()
-            rd["hash_tx_spent"] = rd["hash_tx_spent"].hex()
+            rd["hash_this_tx"] = CBUtil.safe_hash(rd["hash_this_tx"]).hex()
+            rd["hash_tx_spent"] = CBUtil.safe_hash(rd["hash_tx_spent"]).hex()
             ret = str(self.__dict__)
-        except:
-            pass
+        except Exception as e:
+            print("Error in Txout")
+            print(e)
 
         return ret
 
@@ -114,7 +120,7 @@ class CBTxOutAddress:
         rd = self.__dict__
         ret = ""
         try:
-            rd["hash_tx"] = rd["hash_tx"].hex()
+            rd["hash_tx"] = CBUtil.safe_hash(rd["hash_tx"]).hex()
             ret = str(self.__dict__)
         except:
             pass

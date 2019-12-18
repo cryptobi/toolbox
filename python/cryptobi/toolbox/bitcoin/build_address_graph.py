@@ -22,6 +22,7 @@ from mysql import connector
 
 from cryptobi.toolbox.system.CBConfig import CBConfig
 from cryptobi.model.blockchains.CBBlock import CBBlock
+from cryptobi.crypto.CBUtil import CBUtil
 from cryptobi.db.dao.CBDAO import CBDAO
 
 config = CBConfig.get_config()
@@ -31,13 +32,13 @@ height = 0
 
 while current_block:
 
-    print("BLOCK {}".format(current_block.hash.hex()))
-    txs = dao.list_tx_by_block(current_block.hash)
+    print("BLOCK {}".format(CBUtil.safe_hash(current_block.hash).hex()))
+    txs = dao.list_tx_by_block(CBUtil.safe_hash(current_block.hash))
 
     for tx in txs:
-        print("TX {}".format(tx.hash_this_tx.hex()))
-        inputs = dao.list_tx_in(tx.hash_this_tx)
-        outputs = dao.list_tx_out(tx.hash_this_tx)
+        print("TX {}".format(CBUtil.safe_hash(tx.hash_this_tx).hex()))
+        inputs = dao.list_tx_in(CBUtil.safe_hash(tx.hash_this_tx))
+        outputs = dao.list_tx_out(CBUtil.safe_hash(tx.hash_this_tx))
         for input in inputs:
             print(input)
         for output in outputs:
@@ -45,6 +46,6 @@ while current_block:
 
     print()
 
-    current_block = dao.get_next_block(current_block.hash)
+    current_block = dao.get_next_block(CBUtil.safe_hash(current_block.hash))
     height += 1
 
