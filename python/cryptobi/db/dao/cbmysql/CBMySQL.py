@@ -14,7 +14,6 @@
 
 """
 
-import sys
 from cryptobi.db.dao.CBDAODriver import CBDAODriver
 from cryptobi.model.graph.CBInfoNode import CBInfoNode
 from cryptobi.model.blockchains.CBBlock import CBBlock
@@ -83,7 +82,7 @@ class CBMySQL(CBDAODriver):
         """
         return self.__get_block_by(prev_block_hash, "hash_prev_block")
 
-    def __get_block_by(self, hash, column) -> CBBlock:
+    def __get_block_by(self, phash, column) -> CBBlock:
         """
         Refactored get block funcs by a certain column.
         """
@@ -94,7 +93,7 @@ class CBMySQL(CBDAODriver):
         sql = "SELECT table_seq, n_version, hash_this_block, hash_prev_block, hash_merkle_root, hash_next_block, n_time, n_bits, nonce, block_height FROM {}.cb_blockchain WHERE {} = %s".format(db, column)
 
         try:
-            cursor.execute(sql, (hash, ))
+            cursor.execute(sql, (phash, ))
         except Exception as e:
             print(e)
             cursor.close()
@@ -133,6 +132,7 @@ class CBMySQL(CBDAODriver):
         cursor.close()
 
     def set_next_block_hash_and_height(self, thisblock_hash, nextblock_hash, height):
+
         cursor = self.cnx.cursor()
         db = self.config.get_conf("db.db")
         sql = "UPDATE {}.cb_blockchain SET hash_next_block = %s, block_height = %s WHERE hash_this_block = %s".format(db)
@@ -148,13 +148,14 @@ class CBMySQL(CBDAODriver):
         cursor.close()
 
     def get_latest_block(self):
+
         ret = None
         cursor = self.cnx.cursor()
         db = self.config.get_conf("db.db")
         sql = "SELECT table_seq, n_version, hash_this_block, hash_prev_block, hash_merkle_root, hash_next_block, n_time, n_bits, nonce, block_height FROM {}.cb_blockchain ORDER BY table_seq DESC LIMIT 1".format(db)
 
         try:
-            cursor.execute(sql, (hash, ))
+            cursor.execute(sql)
         except Exception as e:
             print(e)
             cursor.close()
@@ -181,32 +182,28 @@ class CBMySQL(CBDAODriver):
         block = self.get_latest_block()
         return block.hash
 
-    def insert_block_file(self, filename, hash, byte_offset):
+    def insert_block_file(self, filename, blockhash, byte_offset):
         """
         Block file insertion is currently done in C++.
         """
         pass
 
-    def get_latest_block_file(self, filename, hash, byte_offset):
+    def get_latest_block_file(self):
+
         ret = None
         cursor = self.cnx.cursor()
         db = self.config.get_conf("db.db")
         sql = "SELECT table_seq, hash_this_block, filename, byte_offset FROM {}.cb_blockchain_files ORDER BY table_seq DESC LIMIT 1".format(db)
 
         try:
-            cursor.execute(sql, (hash, ))
+            cursor.execute(sql)
         except Exception as e:
             print(e)
             cursor.close()
             return None
 
         for table_seq, hash_this_block, filename, byte_offset in cursor:
-            cbb = CBBlockFile()
-            cbb.table_seq = table_seq
-            cbb.hash_this_block = hash_this_block
-            cbb.filename = filename
-            cbb.byte_offset = byte_offset
-            ret = cbb
+            ret = CBBlockFile(table_seq, hash_this_block, filename, byte_offset)
 
         cursor.close()
         return ret
@@ -218,6 +215,7 @@ class CBMySQL(CBDAODriver):
         pass
 
     def list_tx_by_block(self, block_hash):
+
         ret = []
         cursor = self.cnx.cursor()
 
@@ -241,6 +239,7 @@ class CBMySQL(CBDAODriver):
         return ret
 
     def get_tx_by_hash(self, hashtx):
+
         ret = None
         cursor = self.cnx.cursor()
 
@@ -264,6 +263,7 @@ class CBMySQL(CBDAODriver):
         return ret
 
     def get_latest_tx(self):
+
         ret = None
         cursor = self.cnx.cursor()
 
@@ -293,6 +293,7 @@ class CBMySQL(CBDAODriver):
         pass
 
     def get_tx_in(self, vin):
+
         ret = None
         cursor = self.cnx.cursor()
 
@@ -460,7 +461,7 @@ class CBMySQL(CBDAODriver):
         cursor = self.cnx.cursor()
 
         sql = "INSERT INTO {}.cb_info_nodes(block_hash, tx_hash, address, content) VALUES(%s, %s, %s, %s)".format(self.config.get_conf("db.db"))
-        ret = cursor.execute(sql, (inode.block_hash, inode.tx_hash, inode.address, inode.content))
+        cursor.execute(sql, (inode.block_hash, inode.tx_hash, inode.address, inode.content))
         ret = cursor.lastrowid
         cursor.close()
         return ret
@@ -491,12 +492,12 @@ class CBMySQL(CBDAODriver):
         cursor.close()
         return ret
 
-    def list_info_node_by_block_hash(self,  hash):
+    def list_info_node_by_block_hash(self,  block_hash):
         ret = []
         cursor = self.cnx.cursor()
 
         sql = "SELECT cin_id, block_hash, tx_hash, address, content FROM {}.cb_info_nodes WHERE block_hash = %s".format(self.config.get_conf("db.db"))
-        cursor.execute(sql, (hash, ))
+        cursor.execute(sql, (block_hash, ))
 
         for cin_id, block_hash, tx_hash, address, content in cursor:
             ret.append(CBInfoNode(cin_id, block_hash, tx_hash, address, content))
@@ -504,12 +505,12 @@ class CBMySQL(CBDAODriver):
         cursor.close()
         return ret
 
-    def list_info_node_by_tx_hash(self,  hash):
+    def list_info_node_by_tx_hash(self,  txhash):
         ret = []
         cursor = self.cnx.cursor()
 
         sql = "SELECT cin_id, block_hash, tx_hash, address, content FROM {}.cb_info_nodes WHERE tx_hash = %s".format(self.config.get_conf("db.db"))
-        cursor.execute(sql, (hash, ))
+        cursor.execute(sql, (txhash, ))
 
         for cin_id, block_hash, tx_hash, address, content in cursor:
             ret.append(CBInfoNode(cin_id, block_hash, tx_hash, address, content))

@@ -21,7 +21,7 @@ class CBTx:
     """
     def __init__(self):
         self.table_seq = 0
-        self.hash_this_tx = False
+        self.hash_this_tx = bytes.fromhex("00")
         self.n_version = 1
         self.has_witness = False
         self.in_counter = 0
@@ -31,7 +31,17 @@ class CBTx:
         self.hash_block = bytes.fromhex("00")
 
     def __repr__(self):
-        return self.hash_this_tx.hex()
+        rd = self.__dict__
+        ret = ""
+        try:
+            rd["hash_this_tx"] = rd["hash_this_tx"].hex()
+            rd["hash_block"] = rd["hash_block"].hex()
+            rd["witness_hash"] = rd["witness_hash"].hex()
+            ret = str(self.__dict__)
+        except:
+            pass
+
+        return ret
 
 
 

@@ -20,26 +20,21 @@
 # mysql module is not used here but must be loaded first on some systems
 from mysql import connector
 
-import sys
 from cryptobi.toolbox.system.CBConfig import CBConfig
+from cryptobi.model.blockchains.CBBlock import CBBlock
 from cryptobi.db.dao.CBDAO import CBDAO
-import argparse
-
-parser = argparse.ArgumentParser(description = "Query a Bitcoin TX from the local databse.")
-parser.add_argument('tx_hash', type=str, nargs=1)
-args = parser.parse_args()
+import sys
 
 config = CBConfig.get_config()
+dao = CBDAO.get_DAO()
 
-dao_a = CBDAO()
-dao = dao_a.get_DAO()
+# bootstrap the blockchain
+current_block = CBBlock.genesis()
+height = 0
 
-tx_hash = config.get_conf("listargs")
-
-if not len(tx_hash) > 0:
-    config.log_error("Invalid TX hash.")
-    sys.exit(1)
-
-tx = dao.get_tx_by_hash(bytes.fromhex(tx_hash))
-print(tx)
+# walk the blockchain
+while current_block:
+    print("{:10} {}".format(height, current_block.hash.hex()))
+    height += 1
+    current_block = dao.get_next_block(current_block.hash)
 

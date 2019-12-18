@@ -36,10 +36,11 @@ height = 0
 while current_block:
 
     print("{:10} {}".format(height, current_block.hash.hex()))
-    height += 1
     old_block = current_block
 
     current_block = dao.get_next_block(current_block.hash)
 
     if current_block:
         dao.set_next_block_hash_and_height(old_block.hash, current_block.hash, height)
+
+    height += 1
