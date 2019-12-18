@@ -52,13 +52,22 @@ class CBTxIn:
     """
 
     def __init__(self, table_seq, txid, n_vout, hash_this_tx, n_sequence):
-        self.table_seq =table_seq
+        self.table_seq = table_seq
         self.txid = txid
         self.n_vout = n_vout
         self.hash_this_tx = hash_this_tx
         self.n_sequence = n_sequence
 
+    def __repr__(self):
+        rd = self.__dict__
+        ret = ""
+        try:
+            rd["hash_this_tx"] = rd["hash_this_tx"].hex()
+            ret = str(self.__dict__)
+        except:
+            pass
 
+        return ret
 
 class CBTxOut:
 
@@ -75,6 +84,17 @@ class CBTxOut:
         self.script_req_sigs = script_req_sigs
         self.script_type = script_type
 
+    def __repr__(self):
+        rd = self.__dict__
+        ret = ""
+        try:
+            rd["hash_this_tx"] = rd["hash_this_tx"].hex()
+            rd["hash_tx_spent"] = rd["hash_tx_spent"].hex()
+            ret = str(self.__dict__)
+        except:
+            pass
+
+        return ret
 
 class CBTxOutAddress:
 
@@ -89,3 +109,14 @@ class CBTxOutAddress:
         self.address = address
         self.script_req_sigs = script_req_sigs
         self.script_type = script_type
+
+    def __repr__(self):
+        rd = self.__dict__
+        ret = ""
+        try:
+            rd["hash_tx"] = rd["hash_tx"].hex()
+            ret = str(self.__dict__)
+        except:
+            pass
+
+        return ret

@@ -20,28 +20,31 @@
 # mysql module is not used here but must be loaded first on some systems
 from mysql import connector
 
-import cryptobi.toolbox.system.CBConfig
-from cryptobi.db.dao.CBDAO import CBDAO
+from cryptobi.toolbox.system.CBConfig import CBConfig
 from cryptobi.model.blockchains.CBBlock import CBBlock
-import sys
+from cryptobi.db.dao.CBDAO import CBDAO
 
-BATCH_SIZE = 5000
-GENESIS_HASH = bytes.fromhex("000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f")
+config = CBConfig.get_config()
+dao = CBDAO.get_DAO()
+current_block = CBBlock.genesis()
+height = 0
 
-dao_a = CBDAO()
-dao = dao_a.get_DAO()
+while current_block:
 
-# fetch genesis block from DB
-current_block = dao.get_block_by_hash(GENESIS_HASH)
+    print("BLOCK {}".format(current_block.hash.hex()))
+    txs = dao.list_tx_by_block(current_block.hash)
 
-if not current_block:
-    print("Unable to load Genesis block from local DB. Have you built the DB using toolbox/db/blocks_inserter?")
-    sys.exit(1)
+    for tx in txs:
+        print("TX {}".format(tx.hash_this_tx.hex()))
+        inputs = dao.list_tx_in(tx.hash_this_tx)
+        outputs = dao.list_tx_out(tx.hash_this_tx)
+        for input in inputs:
+            print(input)
+        for output in outputs:
+            print(output)
 
-# visit the entire blockchain, building the address graph
-while not current_block is None:
-    vtx = dao.list_tx_by_block(current_block.hash)
-    for tx in vtx:
-        inputs = dao.list_tx_in(tx.hash)
-        outputs = dao.list_tx_out(tx.hash)
-        pass
+    print()
+
+    current_block = dao.get_next_block(current_block.hash)
+    height += 1
+
