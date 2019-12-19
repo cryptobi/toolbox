@@ -39,7 +39,7 @@ class CBTx:
             rd["hash_this_tx"] = CBUtil.safe_hash(rd["hash_this_tx"]).hex()
             rd["hash_block"] = CBUtil.safe_hash(rd["hash_block"]).hex()
             rd["witness_hash"] = CBUtil.safe_hash(rd["witness_hash"]).hex()
-            ret = str(self.__dict__)
+            ret = str(rd)
         except:
             pass
 
@@ -66,7 +66,7 @@ class CBTxIn:
         try:
             rd["hash_this_tx"] = CBUtil.safe_hash(rd["hash_this_tx"]).hex()
             rd["txid"] = CBUtil.safe_hash(rd["txid"]).hex()
-            ret = str(self.__dict__)
+            ret = str(rd)
         except Exception as e:
             print("Error in TxIn")
             print(e)
@@ -95,7 +95,7 @@ class CBTxOut:
         try:
             rd["hash_this_tx"] = CBUtil.safe_hash(rd["hash_this_tx"]).hex()
             rd["hash_tx_spent"] = CBUtil.safe_hash(rd["hash_tx_spent"]).hex()
-            ret = str(self.__dict__)
+            ret = str(rd)
         except Exception as e:
             print("Error in Txout")
             print(e)
@@ -121,7 +121,7 @@ class CBTxOutAddress:
         ret = ""
         try:
             rd["hash_tx"] = CBUtil.safe_hash(rd["hash_tx"]).hex()
-            ret = str(self.__dict__)
+            ret = str(rd)
         except:
             pass
 

@@ -83,16 +83,25 @@ class CBDAODriver:
     def get_tx_out(self, vout):
         pass
 
+    def get_tx_out_byhash_nvout(self, txhash, nvout):
+        pass
+
     def get_latest_tx_out(self):
         pass
 
     def list_tx_out(self, tx_hash):
         pass
 
+    def list_tx_out_from_inputs(self, input_list):
+        pass
+
     def insert_tx_out_address(self, tx_hash, nvout, addr, req_sigs, script_type):
         pass
 
     def list_tx_out_addresses(self, tx_hash):
+        pass
+
+    def get_tx_out_address_byhash_nvout(self, txhash, nvout):
         pass
 
     def insert_address_graph(self, ag):

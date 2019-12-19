@@ -12,6 +12,8 @@
  *
  */
 
+    List coinbase transactions.
+
 """
 
 # KNOWN BUG: must load the mysql module before all other libraries
@@ -23,29 +25,24 @@ from mysql import connector
 from cryptobi.toolbox.system.CBConfig import CBConfig
 from cryptobi.model.blockchains.CBBlock import CBBlock
 from cryptobi.db.dao.CBDAO import CBDAO
-import sys
 
 config = CBConfig.get_config()
+dao = CBDAO.get_DAO()
+current_block = CBBlock.genesis()
+height = 0
 
-dao_a = CBDAO()
-dao = dao_a.get_DAO()
+# walk the blockchain, listing coinbase TX details
+while current_block:
 
-addr = config.get_conf("listargs")
+    print("BLOCK {}".format(current_block.hash.hex()))
+    txs = dao.list_tx_by_block(current_block.hash)
 
-if not len(addr) > 0:
-    config.log_error("Invalid block hash.")
-    sys.exit(1)
+    if len(txs) > 0:
+        tx = txs[0]
+        print("TX {}".format(tx))
 
-block_hash = bytes.fromhex(addr)
+    print()
 
-if block_hash == CBBlock.genesis().hash:
-    print(CBBlock())
-    sys.exit(1)
+    current_block = dao.get_next_block(current_block.hash)
+    height += 1
 
-block = dao.get_block_by_hash(block_hash)
-
-if block:
-    vtx = dao.list_tx_by_block(block.hash)
-    block.vtx = vtx
-
-print(block)

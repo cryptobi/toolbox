@@ -59,7 +59,7 @@ class CBBlock:
             rd["merkle_root"] = rd["merkle_root"].hex()
             rd["hash_prev_block"] = rd["hash_prev_block"].hex()
             rd["hash_next_block"] = rd["hash_next_block"].hex()
-            ret = str(self.__dict__)
+            ret = str(rd)
         except:
             pass
 

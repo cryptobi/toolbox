@@ -16,6 +16,7 @@
 
 from cryptobi.db.dao.CBDAODriver import CBDAODriver
 from cryptobi.model.graph.CBInfoNode import CBInfoNode
+from cryptobi.model.graph.CBAGNode import CBAGNode
 from cryptobi.model.blockchains.CBBlock import CBBlock
 from cryptobi.model.blockchains.CBTx import CBTx
 from cryptobi.model.blockchains.CBTx import CBTxIn
@@ -219,7 +220,7 @@ class CBMySQL(CBDAODriver):
         ret = []
         cursor = self.cnx.cursor()
 
-        sql = "SELECT table_seq, hash_this_tx, n_version, has_witness, in_counter, lock_time, block_order, witness_hash, hash_block FROM {}.cb_tx WHERE hash_block = %s".format(self.config.get_conf("db.db"))
+        sql = "SELECT table_seq, hash_this_tx, n_version, has_witness, in_counter, lock_time, block_order, witness_hash, hash_block FROM {}.cb_tx WHERE hash_block = %s ORDER BY block_order".format(self.config.get_conf("db.db"))
         cursor.execute(sql, (block_hash, ))
 
         for table_seq, hash_this_tx, n_version, has_witness, in_counter, lock_time, block_order, witness_hash, hash_block in cursor:
@@ -323,7 +324,7 @@ class CBMySQL(CBDAODriver):
         ret = []
         cursor = self.cnx.cursor()
 
-        sql = "SELECT table_seq, txid, n_vout, hash_this_tx, n_sequence FROM {}.cb_tx_in WHERE hash_this_tx = %s".format(self.config.get_conf("db.db"))
+        sql = "SELECT table_seq, txid, n_vout, hash_this_tx, n_sequence FROM {}.cb_tx_in WHERE hash_this_tx = %s ORDER BY n_sequence".format(self.config.get_conf("db.db"))
         cursor.execute(sql, (tx_hash, ))
 
         for table_seq, txid, n_vout, hash_this_tx, n_sequence in cursor:
@@ -351,6 +352,19 @@ class CBMySQL(CBDAODriver):
         cursor.close()
         return ret
 
+    def get_tx_out_byhash_nvout(self, txhash, nvout):
+        ret = None
+        cursor = self.cnx.cursor()
+
+        sql = "SELECT table_seq, satoshis, n_vout, hash_this_tx, hash_tx_spent, script_req_sigs, script_type FROM {}.cb_tx_out WHERE hash_this_tx = %s AND n_vout = %s".format(self.config.get_conf("db.db"))
+        cursor.execute(sql, (txhash, nvout))
+
+        for table_seq, satoshis, n_vout, hash_this_tx, hash_tx_spent, script_req_sigs, script_type in cursor:
+            ret = CBTxOut(table_seq, satoshis, n_vout, hash_this_tx, hash_tx_spent, script_req_sigs, script_type)
+
+        cursor.close()
+        return ret
+
     def get_latest_tx_out(self):
         ret = None
         cursor = self.cnx.cursor()
@@ -368,8 +382,30 @@ class CBMySQL(CBDAODriver):
         ret = []
         cursor = self.cnx.cursor()
 
-        sql = "SELECT table_seq, satoshis, n_vout, hash_this_tx, hash_tx_spent, script_req_sigs, script_type FROM {}.cb_tx_out WHERE hash_this_tx = %s".format(self.config.get_conf("db.db"))
+        sql = "SELECT table_seq, satoshis, n_vout, hash_this_tx, hash_tx_spent, script_req_sigs, script_type FROM {}.cb_tx_out WHERE hash_this_tx = %s ORDER BY n_vout".format(self.config.get_conf("db.db"))
         cursor.execute(sql, (tx_hash, ))
+
+        for table_seq, satoshis, n_vout, hash_this_tx, hash_tx_spent, script_req_sigs, script_type in cursor:
+            ret.append(CBTxOut(table_seq, satoshis, n_vout, hash_this_tx, hash_tx_spent, script_req_sigs, script_type))
+
+        cursor.close()
+        return ret
+
+    def list_tx_out_from_inputs(self, input_list):
+        """
+        Make the link from TX inputs to their outputs or
+        coinbase TX.
+        """
+        ret = []
+        cursor = self.cnx.cursor()
+
+
+        format_string_list = "%s" * len(input_list)
+        format_string = format_string_list.join(", ")
+        query_params = tuple(map(lambda txin: txin.txid, input_list))
+
+        sql = "SELECT table_seq, satoshis, n_vout, hash_this_tx, hash_tx_spent, script_req_sigs, script_type FROM {}.cb_tx_out WHERE hash_this_tx IN ({}) ORDER BY n_vout".format(self.config.get_conf("db.db"), format_string)
+        cursor.execute(sql, query_params)
 
         for table_seq, satoshis, n_vout, hash_this_tx, hash_tx_spent, script_req_sigs, script_type in cursor:
             ret.append(CBTxOut(table_seq, satoshis, n_vout, hash_this_tx, hash_tx_spent, script_req_sigs, script_type))
@@ -387,11 +423,24 @@ class CBMySQL(CBDAODriver):
         ret = []
         cursor = self.cnx.cursor()
 
-        sql = "SELECT table_seq, n_vout, hash_tx, address, script_req_sigs, script_type FROM {}.cb_tx_out_addresses WHERE hash_tx = %s".format(self.config.get_conf("db.db"))
+        sql = "SELECT table_seq, n_vout, hash_tx, address, script_req_sigs, script_type FROM {}.cb_tx_out_addresses WHERE hash_tx = %s ORDER BY n_vout".format(self.config.get_conf("db.db"))
         cursor.execute(sql, (tx_hash, ))
 
         for table_seq, n_vout, hash_tx, address, script_req_sigs, script_type in cursor:
             ret.append(CBTxOutAddress(table_seq, n_vout, hash_tx, address, script_req_sigs, script_type))
+
+        cursor.close()
+        return ret
+
+    def get_tx_out_address_byhash_nvout(self, txhash, nvout):
+        ret = None
+        cursor = self.cnx.cursor()
+
+        sql = "SELECT table_seq, n_vout, hash_tx, address, script_req_sigs, script_type FROM {}.cb_tx_out_addresses WHERE hash_tx = %s AND n_vout = %s".format(self.config.get_conf("db.db"))
+        cursor.execute(sql, (txhash, nvout, ))
+
+        for table_seq, n_vout, hash_tx, address, script_req_sigs, script_type in cursor:
+            ret = CBTxOutAddress(table_seq, n_vout, hash_tx, address, script_req_sigs, script_type)
 
         cursor.close()
         return ret
@@ -401,12 +450,10 @@ class CBMySQL(CBDAODriver):
         Inserts an address graph entry into table cb_address_graph or equivalent.
         @param ag is an instance of cryptobi.model.graph.CBInfoNode
         """
-        # vin, vout, addr_from, addr_to, satoshis, n_time
-        ret = -1
         cursor = self.cnx.cursor()
 
         sql = "INSERT INTO {}.cb_address_graph(n_vout, tx_from, n_vin, tx_to, address_from, address_to, satoshis, n_time) VALUES(%s, %s, %s, %s, %s, %s, %s, %s)".format(self.config.get_conf("db.db"))
-        ret = cursor.execute(sql, (ag.n_vout, ag.tx_from, ag.n_vin, ag.tx_to, ag.address_from, ag.address_to, ag.satoshis, ag.n_time))
+        cursor.execute(sql, (ag.n_vout, ag.tx_from, ag.n_vin, ag.tx_to, ag.address_from, ag.address_to, ag.satoshis, ag.n_time))
         ret = cursor.lastrowid
         cursor.close()
         return ret
@@ -419,8 +466,8 @@ class CBMySQL(CBDAODriver):
         sql = "SELECT cag_id, n_vout, tx_from, n_vin, tx_to, address_from, address_to, satoshis, n_time FROM {}.cb_address_graph WHERE address_from = %s OR address_to = %s".format(self.config.get_conf("db.db"))
         cursor.execute(sql, (addr, addr, ))
 
-        for cin_id, block_hash, tx_hash, address, content in cursor:
-            ret.append(CBInfoNode(cin_id, block_hash, tx_hash, address, content))
+        for cag_id, n_vout, tx_from, n_vin, tx_to, address_from, address_to, satoshis, n_time in cursor:
+            ret.append(CBAGNode(cag_id, n_vout, tx_from, n_vin, tx_to, address_from, address_to, satoshis, n_time))
 
         cursor.close()
         return ret

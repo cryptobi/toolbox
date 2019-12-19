@@ -12,6 +12,10 @@
  *
  */
 
+    Disable database keys.
+    Run this script if inserts are very slow.
+    Remember to reenable keys by running enable_keys.py after you're done.
+
 """
 
 # KNOWN BUG: must load the mysql module before all other libraries
@@ -21,31 +25,9 @@
 from mysql import connector
 
 from cryptobi.toolbox.system.CBConfig import CBConfig
-from cryptobi.model.blockchains.CBBlock import CBBlock
 from cryptobi.db.dao.CBDAO import CBDAO
-import sys
 
 config = CBConfig.get_config()
+dao = CBDAO.get_DAO()
 
-dao_a = CBDAO()
-dao = dao_a.get_DAO()
-
-addr = config.get_conf("listargs")
-
-if not len(addr) > 0:
-    config.log_error("Invalid block hash.")
-    sys.exit(1)
-
-block_hash = bytes.fromhex(addr)
-
-if block_hash == CBBlock.genesis().hash:
-    print(CBBlock())
-    sys.exit(1)
-
-block = dao.get_block_by_hash(block_hash)
-
-if block:
-    vtx = dao.list_tx_by_block(block.hash)
-    block.vtx = vtx
-
-print(block)
+dao.enable_keys()
