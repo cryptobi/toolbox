@@ -16,7 +16,7 @@ macro(toolbox_prog fn)
 	target_link_libraries(${fn} cbtoolbox-static)
 endmacro()
 
-
 toolbox_prog("blocks_inserter")
 toolbox_prog("blocks_to_sql")
 toolbox_prog("test_connection")
+toolbox_prog("blocks_updater")
