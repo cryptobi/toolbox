@@ -14,6 +14,7 @@
 
 #include <memory>
 #include <primitives/block.h>
+#include "model/blockchains/CBHash.h"
 #include "CBTx.h"
 
 namespace model::blockchains {
